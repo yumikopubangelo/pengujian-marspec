@@ -50,12 +50,10 @@ dulu, ambil TODO dari bagian 3.
 
 | Peran | Tugas | Anggota |
 |---|---|---|
-| Koordinator laporan | merangkai laporan akhir, menyeragamkan format | [ ] |
 | Penyiap lingkungan | memastikan semua bisa clone + `pytest` hijau di laptopnya di minggu pertama | [ ] |
 | Penjaga templat | satu-satunya yang menyunting `conftest.py`; menjaga konsistensi penamaan | [ ] |
 | Pencatat bug | merawat `LOG_BUG.md`, memastikan setiap bug punya langkah reproduksi | [ ] |
 | Slide presentasi | menyusun slide dari laporan | [ ] |
-| Peninjau silang | mengatur siapa meninjau PR siapa (mis. 1→2→3→4→5→6→1) | [ ] |
 
 ## 4. Tahapan
 
