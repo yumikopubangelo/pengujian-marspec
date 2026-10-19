@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MARSPEC — Simulator Laut</title>
+  <!-- Semua hasil model dipanggang oleh bangun_demo.py. Tidak ada pustaka luar,
+       tidak ada internet: halaman ini aman dibuka di laptop expo mana pun. -->
+  <script src="data/demo.js"></script>
+  <style>
+    :root {
+      --bg: #f6f7f8; --teks: #17202a; --redup: #5d6670; --kartu: #ffffff; --garis: #dde1e5;
+      --aksen: #1f6f9f; --benar: #1f7a4d; --salah: #b4432a; --ragu: #a0711c;
+      --titik-asli: #1f6f9f; --titik-terima: #c2571a;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #11161b; --teks: #e8edf1; --redup: #9aa5af; --kartu: #1b2229; --garis: #2c353e;
+              --aksen: #5fb0e3; --benar: #4fbf86; --salah: #e9785c; --ragu: #e0b25a;
+              --titik-asli: #5fb0e3; --titik-terima: #f08a4b; }
+    }
+    html { font-size: clamp(14px, 1vw, 21px); }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--teks); }
+    header { padding: .9rem 1.1rem .3rem; display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; }
+    header h1 { margin: 0; font-size: 1.5rem; }
+    header h1 small { font-weight: 400; color: var(--redup); font-size: .9rem; }
+    header p { margin: .3rem 0 0; color: var(--redup); }
+    .mode { display: flex; gap: .4rem; }
+    .mode button { border: 1px solid var(--garis); background: var(--kartu); color: var(--teks);
+                   padding: .5rem 1rem; border-radius: 99px; cursor: pointer; font-size: .95rem; font-weight: 600; }
+    .mode button.aktif { background: var(--aksen); color: #fff; border-color: var(--aksen); }
+
+    .tata { display: grid; grid-template-columns: 19rem 1fr 23rem; gap: .8rem; padding: .7rem 1.1rem 1.1rem; }
+    .kartu { background: var(--kartu); border-radius: 10px; padding: .9rem 1rem; }
+    h2 { font-size: 1rem; margin: 0 0 .5rem; }
+    .redup { color: var(--redup); font-size: .86rem; }
+    .label-kontrol { font-weight: 600; margin: .9rem 0 .35rem; font-size: .92rem; }
+    .label-kontrol:first-child { margin-top: 0; }
+
+    .chip { display: inline-block; border: 1px solid var(--garis); background: transparent; color: var(--teks);
+            padding: .32rem .6rem; border-radius: 99px; margin: 0 .25rem .3rem 0; cursor: pointer; font-size: .84rem; }
+    .chip.aktif { background: var(--aksen); border-color: var(--aksen); color: #fff; }
+    select { width: 100%; padding: .4rem; border-radius: 6px; border: 1px solid var(--garis);
+             background: var(--kartu); color: var(--teks); font-size: .9rem; }
+    input[type=range] { width: 100%; accent-color: var(--aksen); }
+    .skala-snr { display: flex; justify-content: space-between; font-size: .78rem; color: var(--redup); }
+    #nilai-snr { font-weight: 600; }
+
+    .laut { display: grid; grid-template-columns: 1fr 1fr; gap: .35rem; }
+    .laut button { border: 1px solid var(--garis); background: transparent; color: var(--teks); border-radius: 8px;
+                   padding: .5rem .3rem; cursor: pointer; font-size: .9rem; }
+    .laut button.aktif { background: var(--aksen); color: #fff; border-color: var(--aksen); }
+    #info-laut { margin-top: .5rem; font-size: .84rem; line-height: 1.5; }
+
+    .gambar { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+    .gambar figure { margin: 0; }
+    .gambar figcaption { font-size: .86rem; color: var(--redup); margin-bottom: .3rem; }
+    canvas { width: 100%; display: block; border-radius: 8px; background: var(--bg); }
+    #spek { margin-top: .7rem; }
+    .legenda-spek { font-size: .8rem; color: var(--redup); margin-top: .3rem; }
+    .legenda-spek span { display: inline-block; width: .8rem; height: .2rem; vertical-align: middle; margin: 0 .25rem 0 .7rem; }
+
+    .model { border: 1px solid var(--garis); border-radius: 8px; padding: .7rem .8rem; margin-bottom: .7rem; }
+    .model h3 { margin: 0 0 .1rem; font-size: .98rem; }
+    .jawab { font-size: 1.35rem; font-weight: 700; margin: .35rem 0 .15rem; }
+    .lencana { display: inline-block; font-size: .78rem; font-weight: 600; padding: .12rem .5rem; border-radius: 99px; color: #fff; margin-right: .3rem; }
+    .benar { background: var(--benar); } .salah { background: var(--salah); } .ragu { background: var(--ragu); }
+    .batang { display: grid; grid-template-columns: 5.2rem 1fr 3rem; gap: .4rem; align-items: center; font-size: .82rem; margin: .2rem 0; }
+    .lajur { background: var(--garis); height: .55rem; border-radius: 3px; overflow: hidden; }
+    .isi { height: 100%; background: var(--aksen); }
+
+    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    th, td { padding: .25rem .3rem; text-align: right; border-bottom: 1px solid var(--garis); }
+    th:first-child, td:first-child { text-align: left; }
+    details { margin-top: .6rem; font-size: .84rem; color: var(--redup); line-height: 1.5; }
+    summary { cursor: pointer; color: var(--aksen); }
+    .tombol-kecil { border: 1px solid var(--garis); background: transparent; color: var(--aksen); border-radius: 6px;
+                    padding: .15rem .5rem; cursor: pointer; font-size: .78rem; }
+    .tombol-kecil.aktif { background: var(--aksen); color: #fff; }
+
+    /* ---- Tantang AI ---- */
+    .tantang-hanya { display: none; }
+    body.tantang .tantang-hanya { display: block; }
+    body.tantang .jelajah-hanya { display: none !important; }
+    .pilihan-kel { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; margin: .5rem 0; }
+    .pilihan-kel button { border: 2px solid var(--garis); background: var(--kartu); color: var(--teks); border-radius: 8px;
+                          padding: .6rem .3rem; cursor: pointer; font-size: .95rem; font-weight: 600; }
+    .pilihan-kel button:disabled { cursor: default; opacity: .55; }
+    .pilihan-kel button.jawaban { border-color: var(--benar); opacity: 1; }
+    .pilihan-kel button.dipilih-salah { border-color: var(--salah); opacity: 1; }
+    .skor { display: grid; grid-template-columns: 1fr auto; gap: .2rem .6rem; font-size: .92rem; margin-top: .4rem; }
+    .skor b { text-align: right; }
+    #tombol-lanjut { width: 100%; margin-top: .6rem; padding: .6rem; border-radius: 8px; border: none;
+                     background: var(--aksen); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    #hasil-ronde { font-size: 1.05rem; font-weight: 700; margin: .4rem 0; min-height: 1.4rem; }
+    .tutup { filter: blur(0); }
+    body.tantang.belum-jawab .rahasia { visibility: hidden; }
+
+    .pesan-tunggu { display: none; font-size: .95rem; }
+    body.tantang.belum-jawab .pesan-tunggu { display: block; }
+    #pita { display: none; position: fixed; right: 1rem; top: .9rem; background: var(--aksen); color: #fff;
+            padding: .5rem 1rem; border-radius: 99px; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,.25); }
+    body.pameran #pita { display: block; }
+
+    /* Mode tantang: hanya satu konstelasi (yang diterima), jadi dipusatkan. */
+    body.tantang .gambar { grid-template-columns: 1fr; }
+    body.tantang .gambar figure { max-width: 34rem; margin: 0 auto; width: 100%; }
+    @media (max-width: 1150px) { .tata { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>MARSPEC <small>Maritime Spectrum Intelligence System</small></h1>
+      <p>Bisakah AI mengenali jenis sinyal radio kapal ketika laut sedang mengamuk? Atur lautnya, lihat sendiri.</p>
+    </div>
+    <div class="mode">
+      <button id="mode-jelajah" class="aktif">Jelajahi</button>
+      <button id="mode-tantang">🎯 Tantang AI</button>
+    </div>
+  </header>
+
+  <div class="tata">
+    <!-- ============ KIRI ============ -->
+    <section class="kartu">
+      <div class="jelajah-hanya">
+        <div class="label-kontrol">1. Jenis sinyal yang dikirim kapal</div>
+        <div id="chip-mod"></div>
+        <select id="pilih-mod"></select>
+
+        <div class="label-kontrol">2. Kondisi laut</div>
+        <div class="laut" id="tombol-laut"></div>
+        <div id="info-laut" class="redup"></div>
+        <details>
+          <summary>Kenapa laut tenang tidak lebih mudah?</summary>
+          Laut yang tenang memantulkan gelombang radio seperti <b>cermin</b>. Pantulan itu
+          tiba sedikit terlambat dan bertabrakan dengan sinyal aslinya. Dalam pengukuran
+          kami, pantulan permukaan laut adalah perusak terbesar: <b>98%</b> dari kerusakan
+          yang bisa dihilangkan. Ombak badai justru mengacak permukaan sehingga pantulannya
+          sedikit lebih lemah. Angka ρ (0 = tanpa pantulan, 1 = cermin sempurna) di atas:
+          laut tenang dan sedang 0,95, badai 0,83.
+        </details>
+
+        <div class="label-kontrol">3. Kekuatan sinyal: <span id="nilai-snr"></span></div>
+        <input id="snr" type="range" min="0" step="1">
+        <div class="skala-snr"><span>sangat lemah</span><span>kuat</span></div>
+
+        <div class="label-kontrol">4. Contoh rekaman</div>
+        <span class="chip" data-n="0">contoh 1</span><span class="chip" data-n="1">contoh 2</span>
+
+        <details>
+          <summary>Apa itu "jenis sinyal" (modulasi)?</summary>
+          Radio mengirim data dengan mengubah-ubah gelombang: kuatnya, sudutnya, atau
+          frekuensinya. Cara mengubahnya disebut <b>modulasi</b>, misalnya QPSK atau 16QAM.
+          Mengenali modulasi adalah langkah pertama untuk memantau siapa yang memancar di
+          laut, misalnya kapal ilegal atau pengganggu sinyal.
+        </details>
+      </div>
+
+      <div class="tantang-hanya">
+        <h2>🎯 Bisakah kamu mengalahkan AI?</h2>
+        <div class="redup">Lihat titik-titik oranye: sinyal setelah melewati laut. Tebak
+          <b>keluarga</b> sinyalnya. AI juga menebak sinyal yang sama.</div>
+        <div class="pilihan-kel" id="pilihan-kel"></div>
+        <div id="hasil-ronde"></div>
+        <button id="tombol-lanjut">Ronde berikutnya →</button>
+        <details>
+          <summary>Petunjuk tiap keluarga</summary>
+          <b>PSK</b>: titik-titik di satu lingkaran · <b>QAM</b>: kotak-kotak berlapis ·
+          <b>APSK</b>: beberapa lingkaran · <b>ASK</b>: titik di satu garis ·
+          <b>AM/FM</b>: sinyal suara analog, tanpa titik tegas · <b>CPM</b> (GMSK): lingkaran halus.
+          Di laut, semuanya buyar. Itulah intinya.
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ TENGAH ============ -->
+    <section class="kartu">
+      <div class="gambar">
+        <figure class="jelajah-hanya">
+          <figcaption><b>Sinyal yang dikirim</b> (sebelum lewat laut)</figcaption>
+          <canvas id="kon-asli" width="520" height="520"></canvas>
+        </figure>
+        <figure>
+          <figcaption><b>Sinyal yang diterima</b> (setelah lewat laut)</figcaption>
+          <canvas id="kon-terima" width="520" height="520"></canvas>
+        </figure>
+      </div>
+      <canvas id="spek" width="1100" height="200"></canvas>
+      <div class="legenda-spek">Spektrum frekuensi:
+        <b class="jelajah-hanya" style="display:inline;color:var(--titik-asli)">biru = dikirim ·</b>
+        <b style="color:var(--titik-terima)">oranye = diterima</b></div>
+      <details class="jelajah-hanya">
+        <summary>Cara membaca gambar ini</summary>
+        Setiap titik adalah satu "ketukan" sinyal, digambar menurut sudut dan kekuatannya.
+        Sinyal digital yang rapi membentuk pola titik yang teratur, dan pola itulah yang
+        membedakan satu modulasi dari yang lain. Di laut, gelombang radio memantul di
+        permukaan air dan bertabrakan dengan dirinya sendiri, sehingga polanya buyar.
+        Pada spektrum, pantulan itu meninggalkan "lembah" di frekuensi tertentu, dan
+        lonjakan tajam yang tiba-tiba muncul adalah <b>pemancar lain</b> di sekitar kapal.
+        <br><br>Kenapa sinyal "yang dikirim" pun tidak serapi gambar di buku: datanya
+        (RadioML 2018) adalah rekaman realistis yang sudah mengandung pembentukan pulsa,
+        sedikit pergeseran frekuensi, dan derau. Titik-titik di antara pola utama adalah
+        perjalanan sinyal dari satu simbol ke simbol berikutnya.
+      </details>
+    </section>
+
+    <!-- ============ KANAN ============ -->
+    <section class="kartu">
+      <h2>Tebakan AI</h2>
+      <div class="pesan-tunggu redup">Pilih jawabanmu di kiri dulu. Tebakan kedua AI untuk
+        sinyal yang sama akan muncul di sini.</div>
+      <div class="rahasia">
+        <div id="jawaban-asli" class="redup"></div>
+        <div id="kartu-marspec" class="model"></div>
+        <div id="kartu-mcformer" class="model"></div>
+      </div>
+
+      <div class="tantang-hanya">
+        <h2 style="margin-top:.6rem">Papan skor</h2>
+        <div class="skor" id="skor"></div>
+        <div class="redup" style="margin-top:.3rem">Dihitung dari semua ronde di laptop ini.
+          <button class="tombol-kecil" id="reset-skor">atur ulang</button></div>
+      </div>
+
+      <div class="jelajah-hanya">
+        <h2 style="margin-top:1rem">Kapan AI menyerah?
+          <button class="tombol-kecil aktif" id="kurva-jenis">jenis</button>
+          <button class="tombol-kecil" id="kurva-kel">keluarga</button></h2>
+        <canvas id="kurva" width="700" height="380"></canvas>
+        <div class="redup" id="legenda-kurva"></div>
+
+        <h2 style="margin-top:1rem">Seluruh skenario demo</h2>
+        <table id="rekap"></table>
+        <details>
+          <summary>Supaya adil: catatan perbandingan</summary>
+          <span id="catatan-adil"></span>
+        </details>
+      </div>
+    </section>
+  </div>
+
+  <div id="pita">Mode pameran · sentuh layar untuk mencoba sendiri</div>
+
+<script>
+// =====================================================================
+// 1. DATA & KEADAAN
+// =====================================================================
+const D = window.DEMO;
+const FAVORIT = ["BPSK", "QPSK", "8PSK", "16QAM", "64QAM", "FM", "GMSK", "AM-DSB-WC"];
+const LAUT = [
+  { id: "bersih", label: "Tanpa laut" },
+  { id: "tenang", label: "Tenang" },
+  { id: "sedang", label: "Sedang" },
+  { id: "badai",  label: "Badai" },
+];
+const KELUARGA = Object.keys(D.keluarga);
+const keadaan = { mod: "QPSK", laut: "sedang", snr: D.snr.length - 1, n: 0,
+                  tantang: false, ronde: null, kurvaKel: false };
+
+const idxSampel = {};
+D.sampel.forEach((s, i) => { const k = `${s.mod}|${s.snr}`; (idxSampel[k] = idxSampel[k] || []).push(i); });
+const idxVarian = {};
+D.varian.forEach((v) => { idxVarian[`${v.s}|${v.k}`] = v; });
+
+const warna = (nama) => getComputedStyle(document.documentElement).getPropertyValue(nama).trim();
+const persen = (v) => `${Math.round(v * 100)}%`;
+
+// Koefisien pantulan permukaan (ditampilkan di keterangan kondisi laut),
+// RUMUS YANG SAMA dengan MaritimeChannel.apply:
+//   rho = clip(exp(-2 (k * sigma_h * sin 2°)^2), 0, 0,95),  sigma_h = hs / 4
+// k = 2*pi / lambda, lambda = 1 m (300 MHz, bawaan simulator).
+function rhoDari(hs) {
+  const k = 2 * Math.PI / 1.0, sh = hs / 4, s2 = Math.sin(2 * Math.PI / 180);
+  return Math.min(0.95, Math.max(0, Math.exp(-2 * (k * sh * s2) ** 2)));
+}
+
+// =====================================================================
+// 2. MENGGAMBAR
+// =====================================================================
+// Skala tampilan per gambar = persentil ke-90 besaran titik x 1,6. Dulu skalanya
+// tetap +-2,2 (sinyal dinormalkan ke RMS 1), tapi pada sinyal berpencilan RMS
+// ditarik beberapa titik ekstrem dan polanya menciut jadi gumpalan kecil.
+// Persentil tidak terpengaruh pencilan; titik di luarnya terpotong di tepi.
+function skalaTahan(iq) {
+  const m = [];
+  for (let i = 0; i < iq.length; i += 2) m.push(Math.hypot(iq[i], iq[i + 1]));
+  m.sort((a, b) => a - b);
+  return Math.max(m[Math.floor(m.length * 0.9)] * 1.6, 1e-6);
+}
+
+function gambarKonstelasi(id, iq, warnaTitik) {
+  const c = document.getElementById(id), g = c.getContext("2d");
+  const W = c.width, R = skalaTahan(iq), ke = (v) => (v / R + 1) * W / 2;
+  g.clearRect(0, 0, W, W);
+  g.strokeStyle = warna("--garis"); g.lineWidth = 1;
+  g.beginPath(); g.moveTo(W / 2, 0); g.lineTo(W / 2, W); g.moveTo(0, W / 2); g.lineTo(W, W / 2); g.stroke();
+  g.fillStyle = warnaTitik; g.globalAlpha = 0.65;
+  for (let i = 0; i < iq.length; i += 2) {
+    g.beginPath(); g.arc(ke(iq[i]), W - ke(iq[i + 1]), 3.4, 0, 2 * Math.PI); g.fill();
+  }
+  g.globalAlpha = 1;
+}
+
+function gambarSpektrum(a, b) {
+  const c = document.getElementById("spek"), g = c.getContext("2d");
+  const W = c.width, H = c.height, MIN = -50;
+  g.clearRect(0, 0, W, H);
+  g.strokeStyle = warna("--garis"); g.lineWidth = 1;
+  for (let db = 0; db >= MIN; db -= 10) {
+    const y = (db / MIN) * (H - 20) + 10;
+    g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
+  }
+  const garis = keadaan.tantang ? [[b, warna("--titik-terima")]]
+                                : [[a, warna("--titik-asli")], [b, warna("--titik-terima")]];
+  for (const [data, w] of garis) {
+    g.strokeStyle = w; g.lineWidth = 2.5; g.beginPath();
+    data.forEach((v, i) => {
+      const x = (i / (data.length - 1)) * W, y = (v / MIN) * (H - 20) + 10;
+      i ? g.lineTo(x, y) : g.moveTo(x, y);
+    });
+    g.stroke();
+  }
+}
+
+function kartuModel(id, judul, sub, t, benar, pakaiAmbang) {
+  const tepat = t.top[0][0] === benar.mod, kelTepat = t.kel === benar.kel;
+  const ragu = pakaiAmbang && t.msp < D.ambang;
+  const lencana = ragu
+    ? `<span class="lencana ragu">TIDAK YAKIN: menolak menjawab</span>`
+    : `<span class="lencana ${tepat ? "benar" : "salah"}">${tepat ? "TEPAT" : "SALAH"}</span>` +
+      `<span class="lencana ${kelTepat ? "benar" : "salah"}">keluarga ${kelTepat ? "tepat" : "salah"}</span>`;
+  const batang = t.top.map(([m, p]) => `
+    <div class="batang"><span>${m}</span>
+      <div class="lajur"><div class="isi" style="width:${(p * 100).toFixed(0)}%"></div></div>
+      <span>${(p * 100).toFixed(0)}%</span></div>`).join("");
+  // Menolak menjawab = JANGAN tampilkan keluarga di samping judul jawaban.
+  const kepala = ragu
+    ? `<div class="jawab">Tidak menjawab</div>
+       <div class="redup">tebakan terbaiknya ${t.top[0][0]}, tapi yakinnya hanya
+       ${Math.round(t.msp * 100)}%, di bawah ambang ${Math.round(D.ambang * 100)}%</div>`
+    : `<div class="jawab">${t.top[0][0]} <span class="redup" style="font-size:.85rem;font-weight:400">(${t.kel})</span></div>`;
+  document.getElementById(id).innerHTML = `
+    <h3>${judul}</h3><div class="redup">${sub}</div>${kepala}${lencana}
+    <div style="margin-top:.45rem">${batang}</div>`;
+}
+
+// Kurva akurasi per SNR dari himpunan kalibrasi TERPISAH (bukan sampel demo).
+function gambarKurva() {
+  const c = document.getElementById("kurva"), g = c.getContext("2d");
+  const W = c.width, H = c.height, kiri = 46, bawah = 34, atas = 10, kanan = 10;
+  const K = D.kurva, x = (s) => kiri + (s - K.snr[0]) / (K.snr.at(-1) - K.snr[0]) * (W - kiri - kanan);
+  const y = (v) => atas + (1 - v) * (H - atas - bawah);
+  const akh = keadaan.kurvaKel ? "_kel" : "";
+  g.clearRect(0, 0, W, H);
+  g.font = "16px system-ui"; g.fillStyle = warna("--redup"); g.strokeStyle = warna("--garis"); g.lineWidth = 1;
+  for (let v = 0; v <= 1.001; v += 0.25) {
+    g.beginPath(); g.moveTo(kiri, y(v)); g.lineTo(W - kanan, y(v)); g.stroke();
+    g.fillText(persen(v), 2, y(v) + 5);
+  }
+  for (const s of [-10, 0, 10, 20, 30]) g.fillText(`${s} dB`, x(s) - 18, H - 10);
+  // garis acak
+  const acak = keadaan.kurvaKel ? 0.181 : 1 / 24;
+  g.setLineDash([2, 6]); g.beginPath(); g.moveTo(kiri, y(acak)); g.lineTo(W - kanan, y(acak)); g.stroke(); g.setLineDash([]);
+  const seri = [
+    ["marspec_laut", warna("--titik-terima"), [], "MARSPEC, di laut"],
+    ["mcformer_laut", warna("--redup"), [], "model biasa, di laut"],
+    ["marspec_bersih", warna("--titik-terima"), [7, 6], "MARSPEC, tanpa laut"],
+    ["mcformer_bersih", warna("--redup"), [7, 6], "model biasa, tanpa laut"],
+  ];
+  for (const [kunci, w, putus] of seri) {
+    g.strokeStyle = w; g.lineWidth = 3.5; g.setLineDash(putus); g.beginPath();
+    K[kunci + akh].forEach((v, i) => (i ? g.lineTo(x(K.snr[i]), y(v)) : g.moveTo(x(K.snr[i]), y(v))));
+    g.stroke();
+  }
+  g.setLineDash([]);
+  // penanda SNR yang sedang dipilih
+  const sNow = D.snr[keadaan.snr];
+  g.strokeStyle = warna("--aksen"); g.lineWidth = 2;
+  g.beginPath(); g.moveTo(x(sNow), atas); g.lineTo(x(sNow), H - bawah); g.stroke();
+  document.getElementById("legenda-kurva").innerHTML =
+    `Garis penuh = di laut, putus-putus = tanpa laut. <span style="color:${warna("--titik-terima")}">■</span> MARSPEC ·
+     <span style="color:${warna("--redup")}">■</span> model biasa · titik-titik = tebakan acak. Dari
+     ${(K.n_per_titik).toLocaleString("id")} sinyal per titik, terpisah dari contoh demo.`;
+}
+
+// =====================================================================
+// 3. PERBARUI SEMUA DARI `keadaan`
+// =====================================================================
+function skenarioSekarang() {
+  if (keadaan.tantang) return keadaan.ronde;
+  const snr = D.snr[keadaan.snr];
+  const daftar = idxSampel[`${keadaan.mod}|${snr}`];
+  const si = daftar[Math.min(keadaan.n, daftar.length - 1)];
+  return { si, laut: keadaan.laut };
+}
+
+function perbarui() {
+  const { si, laut } = skenarioSekarang();
+  const s = D.sampel[si], v = idxVarian[`${si}|${laut}`];
+
+  gambarKonstelasi("kon-asli", s.iq, warna("--titik-asli"));
+  gambarKonstelasi("kon-terima", v.iq, warna("--titik-terima"));
+  gambarSpektrum(s.spek, v.spek);
+
+  document.getElementById("jawaban-asli").innerHTML =
+    `Jawaban sebenarnya: <b>${s.mod}</b> (keluarga ${s.kel}), sinyal ${s.snr} dB`;
+  kartuModel("kartu-marspec", "MARSPEC", "dilatih dengan simulasi kondisi laut", v.marspec, s, true);
+  kartuModel("kartu-mcformer", "Model AI biasa (MCformer)", "dilatih hanya dengan sinyal bersih", v.mcformer, s, false);
+
+  if (!keadaan.tantang) {
+    const k = D.kondisi[laut];
+    document.getElementById("info-laut").innerHTML = laut === "bersih"
+      ? "Sinyal diterima apa adanya, tanpa efek laut. Pembanding."
+      : `Skala Beaufort <b>${k.beaufort}</b> · gelombang <b>${k.hs} m</b> · jarak kapal <b>${k.jarak} km</b> · ` +
+        `lapisan duct ${k.duct} m · ${k.interferer} pemancar lain · ` +
+        `pantulan permukaan <b>ρ = ${rhoDari(k.hs).toFixed(2)}</b>${rhoDari(k.hs) >= 0.95 ? " (seperti cermin)" : ""}<br>` +
+        `<span style="font-size:.78rem">Satu catatan kondisi laut asli dari data oseanografi (${k.lat}, ${k.lon})</span>`;
+    document.getElementById("nilai-snr").textContent = `${D.snr[keadaan.snr]} dB`;
+    for (const b of document.querySelectorAll("#chip-mod .chip")) b.classList.toggle("aktif", b.dataset.mod === keadaan.mod);
+    for (const b of document.querySelectorAll("#tombol-laut button")) b.classList.toggle("aktif", b.dataset.id === laut);
+    for (const b of document.querySelectorAll("[data-n]")) b.classList.toggle("aktif", Number(b.dataset.n) === keadaan.n);
+    document.getElementById("pilih-mod").value = keadaan.mod;
+    document.getElementById("snr").value = keadaan.snr;
+    gambarKurva();
+  }
+}
+
+// =====================================================================
+// 4. TANTANG AI — pengunjung lawan AI, tebak KELUARGA sinyal di laut
+// =====================================================================
+// Skor disimpan di browser laptop expo supaya bertambah sepanjang hari.
+// localStorage bisa tak tersedia (mode privat) -> dibungkus try/catch,
+// halaman tetap jalan, skor hanya tidak tersimpan.
+const SKOR_KOSONG = { ronde: 0, manusia: 0, marspec: 0, marspecTolak: 0, mcformer: 0 };
+let skor = { ...SKOR_KOSONG };
+try { skor = { ...SKOR_KOSONG, ...JSON.parse(localStorage.getItem("marspec_skor") || "{}") }; } catch (e) {}
+const simpanSkor = () => { try { localStorage.setItem("marspec_skor", JSON.stringify(skor)); } catch (e) {} };
+
+function tampilkanSkor() {
+  const r = Math.max(skor.ronde, 1);
+  const baris = (nama, n, ket = "") => `<span>${nama}${ket}</span><b>${n}/${skor.ronde} (${persen(n / r)})</b>`;
+  document.getElementById("skor").innerHTML =
+    baris("🙋 Pengunjung", skor.manusia) +
+    baris("🤖 MARSPEC", skor.marspec, skor.marspecTolak ? ` <span class="redup">(+${skor.marspecTolak} kali tidak menjawab)</span>` : "") +
+    baris("🤖 Model biasa", skor.mcformer) +
+    `<span class="redup">Tebakan acak</span><b class="redup">~18%</b>`;
+}
+
+function rondeBaru() {
+  // Acak: kondisi laut (bukan "tanpa laut"), SNR >= 10 dB (supaya soal bisa
+  // dipecahkan, bukan murni derau), jenis dan contoh acak.
+  const laut = ["tenang", "sedang", "badai"][Math.floor(Math.random() * 3)];
+  const snrOk = D.snr.filter((s) => s >= 10);
+  const snr = snrOk[Math.floor(Math.random() * snrOk.length)];
+  const mod = D.mods[Math.floor(Math.random() * D.mods.length)];
+  const daftar = idxSampel[`${mod}|${snr}`];
+  keadaan.ronde = { si: daftar[Math.floor(Math.random() * daftar.length)], laut, sudah: false };
+  document.body.classList.add("belum-jawab");
+  document.getElementById("hasil-ronde").textContent = "";
+  for (const b of document.querySelectorAll("#pilihan-kel button")) { b.disabled = false; b.className = ""; }
+  perbarui();
+}
+
+function jawab(kel) {
+  const r = keadaan.ronde;
+  if (!r || r.sudah) return;
+  r.sudah = true;
+  const s = D.sampel[r.si], v = idxVarian[`${r.si}|${r.laut}`];
+  const manusia = kel === s.kel;
+  const tolak = v.marspec.msp < D.ambang;
+  skor.ronde++;
+  skor.manusia += manusia;
+  if (tolak) skor.marspecTolak++; else skor.marspec += v.marspec.kel === s.kel;
+  skor.mcformer += v.mcformer.kel === s.kel;
+  simpanSkor(); tampilkanSkor();
+  for (const b of document.querySelectorAll("#pilihan-kel button")) {
+    b.disabled = true;
+    if (b.dataset.kel === s.kel) b.className = "jawaban";
+    else if (b.dataset.kel === kel) b.className = "dipilih-salah";
+  }
+  document.getElementById("hasil-ronde").innerHTML = manusia
+    ? `<span style="color:${warna("--benar")}">✓ Tepat! Jawabannya ${s.kel} (${s.mod})</span>`
+    : `<span style="color:${warna("--salah")}">✗ Jawabannya ${s.kel} (${s.mod})</span>`;
+  document.body.classList.remove("belum-jawab");
+}
+
+function aturMode(tantang) {
+  keadaan.tantang = tantang;
+  document.body.classList.toggle("tantang", tantang);
+  document.getElementById("mode-tantang").classList.toggle("aktif", tantang);
+  document.getElementById("mode-jelajah").classList.toggle("aktif", !tantang);
+  if (tantang) { tampilkanSkor(); rondeBaru(); }
+  else { document.body.classList.remove("belum-jawab"); perbarui(); }
+}
+
+// =====================================================================
+// 5. MEMBANGUN KONTROL & TABEL (sekali)
+// =====================================================================
+for (const m of FAVORIT) {
+  const b = document.createElement("span");
+  b.className = "chip"; b.textContent = m; b.dataset.mod = m;
+  b.onclick = () => { keadaan.mod = m; perbarui(); };
+  document.getElementById("chip-mod").appendChild(b);
+}
+const sel = document.getElementById("pilih-mod");
+for (const [kel, ms] of Object.entries(D.keluarga)) {
+  const grup = document.createElement("optgroup"); grup.label = kel;
+  for (const m of ms) { const o = document.createElement("option"); o.value = o.textContent = m; grup.appendChild(o); }
+  sel.appendChild(grup);
+}
+sel.onchange = () => { keadaan.mod = sel.value; perbarui(); };
+for (const l of LAUT) {
+  const b = document.createElement("button");
+  b.textContent = l.label; b.dataset.id = l.id;
+  b.onclick = () => { keadaan.laut = l.id; perbarui(); };
+  document.getElementById("tombol-laut").appendChild(b);
+}
+const geser = document.getElementById("snr");
+geser.max = D.snr.length - 1;
+geser.oninput = (e) => { keadaan.snr = Number(e.target.value); perbarui(); };
+for (const b of document.querySelectorAll("[data-n]")) b.onclick = () => { keadaan.n = Number(b.dataset.n); perbarui(); };
+for (const kel of KELUARGA) {
+  const b = document.createElement("button");
+  b.textContent = kel; b.dataset.kel = kel;
+  b.onclick = () => jawab(kel);
+  document.getElementById("pilihan-kel").appendChild(b);
+}
+document.getElementById("tombol-lanjut").onclick = rondeBaru;
+document.getElementById("reset-skor").onclick = () => { skor = { ...SKOR_KOSONG }; simpanSkor(); tampilkanSkor(); };
+document.getElementById("mode-jelajah").onclick = () => aturMode(false);
+document.getElementById("mode-tantang").onclick = () => aturMode(true);
+document.getElementById("kurva-jenis").onclick = () => { keadaan.kurvaKel = false; tombolKurva(); gambarKurva(); };
+document.getElementById("kurva-kel").onclick = () => { keadaan.kurvaKel = true; tombolKurva(); gambarKurva(); };
+function tombolKurva() {
+  document.getElementById("kurva-jenis").classList.toggle("aktif", !keadaan.kurvaKel);
+  document.getElementById("kurva-kel").classList.toggle("aktif", keadaan.kurvaKel);
+}
+
+document.getElementById("rekap").innerHTML =
+  `<tr><th>kondisi</th><th>MARSPEC<br>tepat · keluarga</th><th>model biasa<br>tepat · keluarga</th></tr>` +
+  LAUT.map((l) => { const r = D.rekap[l.id];
+    return `<tr><td>${l.label}</td><td>${persen(r.marspec_tepat)} · ${persen(r.marspec_kel)}</td>` +
+           `<td>${persen(r.mcformer_tepat)} · ${persen(r.mcformer_kel)}</td></tr>`; }).join("") +
+  `<tr><td colspan="3" class="redup" style="text-align:left">${D.rekap.bersih.n} skenario per kondisi:
+   24 jenis sinyal × ${D.snr.length} kekuatan × 2 contoh. Tebakan acak: 4% (jenis), ~18% (keluarga).</td></tr>`;
+
+document.getElementById("catatan-adil").innerHTML =
+  `Model biasa di sini dilatih hanya dengan sinyal bersih, karena begitulah model pengenal
+   sinyal umumnya dilatih. Jadi keunggulan MARSPEC di laut sebagian besar datang dari
+   <b>cara melatihnya</b> (dengan simulasi laut), bukan semata dari bentuk jaringannya.
+   Uji keadilan kami menunjukkan: model biasa yang ikut dilatih dengan simulasi laut juga
+   membaik jauh.<br><br>
+   "Tidak yakin": MARSPEC menolak menjawab bila keyakinannya di bawah
+   <b>${persen(D.ambang)}</b>. Ambang ini dihitung dari ${D.kalibrasi.n.toLocaleString("id")}
+   sinyal lain supaya jawaban yang <i>diberikan</i> salah paling banyak
+   ${persen(D.kalibrasi.target)}; dengan begitu MARSPEC menjawab
+   ${persen(D.kalibrasi.cakupan)} sinyal laut. Lebih baik berkata "tidak tahu" daripada salah dengan yakin.`;
+
+// =====================================================================
+// 6. MODE PAMERAN — berkeliling sendiri kalau tak disentuh 30 detik
+// =====================================================================
+const pameran = { aktif: false, diam: null, langkah: null, i: 0 };
+function langkahPameran() {
+  const m = FAVORIT[Math.floor(pameran.i / 4) % FAVORIT.length];
+  Object.assign(keadaan, { mod: m, laut: LAUT[pameran.i % 4].id, snr: D.snr.length - 1, n: 0 });
+  pameran.i++;
+  perbarui();
+  pameran.langkah = setTimeout(langkahPameran, 3500);
+}
+function mulaiPameran() {
+  if (keadaan.tantang) aturMode(false);
+  pameran.aktif = true; document.body.classList.add("pameran"); langkahPameran();
+}
+function adaAktivitas() {
+  if (pameran.aktif) { pameran.aktif = false; document.body.classList.remove("pameran"); clearTimeout(pameran.langkah); }
+  clearTimeout(pameran.diam);
+  pameran.diam = setTimeout(mulaiPameran, 30000);
+}
+for (const j of ["pointerdown", "pointermove", "keydown", "wheel", "touchstart"])
+  window.addEventListener(j, adaAktivitas, { passive: true });
+
+// Skenario pembuka: laut sedang, sinyal terkuat, jenis favorit pertama di mana
+// MARSPEC menjawab yakin & tepat. Pilihan PEMBUKA saja: kurva dan tabel rekap
+// seluruh skenario selalu tampil, dan mode pameran berkeliling ke semua kondisi.
+function pilihPembuka() {
+  const sTop = D.snr.at(-1);
+  for (const m of FAVORIT) for (let n = 0; n < 2; n++) {
+    const si = idxSampel[`${m}|${sTop}`][n], v = idxVarian[`${si}|sedang`];
+    if (v.marspec.top[0][0] === m && v.marspec.msp >= D.ambang && v.mcformer.top[0][0] !== m) {
+      Object.assign(keadaan, { mod: m, laut: "sedang", snr: D.snr.length - 1, n });
+      return;
+    }
+  }
+}
+
+if (!D) {
+  document.body.innerHTML = "<p style='padding:2rem'>data/demo.js tidak termuat. Jalankan dulu: " +
+    "<code>python demo_web/bangun_demo.py</code> dari folder marspec_poc/.</p>";
+} else {
+  pilihPembuka();
+  perbarui();
+  const q = new URLSearchParams(location.search);
+  if (q.has("tantang")) aturMode(true);
+  if (q.has("pameran")) mulaiPameran(); else adaAktivitas();
+}
+</script>
+</body>
+</html>

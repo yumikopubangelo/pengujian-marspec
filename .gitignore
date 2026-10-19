@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.venv/
+venv/
+.vscode/
+.idea/
+# data & bobot model TIDAK masuk repositori: pengujian memakai data sintetis
+*.hdf5
+*.h5
+*.pt
+*.pth
+*.npz
