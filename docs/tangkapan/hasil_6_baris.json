@@ -1,0 +1,99 @@
+{
+ "versi": "Chrome/157.0.8103.38",
+ "W-06": {
+  "kel": "ASK",
+  "skorSebelum": "🙋 Pengunjung\n0/0 (0%)\n🤖 MARSPEC\n0/0 (0%)\n🤖 Model biasa\n0/0 (0%)\nTebakan acak\n~18%",
+  "skorSesudah": "🙋 Pengunjung\n1/1 (100%)\n🤖 MARSPEC\n1/1 (100%)\n🤖 Model biasa\n1/1 (100%)\nTebakan acak\n~18%",
+  "hasil": "✓ Tepat! Jawabannya ASK (8ASK)",
+  "tombol": [
+   {
+    "kel": "ASK",
+    "cls": "jawaban",
+    "off": true
+   },
+   {
+    "kel": "PSK",
+    "cls": "",
+    "off": true
+   },
+   {
+    "kel": "APSK",
+    "cls": "",
+    "off": true
+   },
+   {
+    "kel": "QAM",
+    "cls": "",
+    "off": true
+   },
+   {
+    "kel": "AM",
+    "cls": "",
+    "off": true
+   },
+   {
+    "kel": "FM",
+    "cls": "",
+    "off": true
+   },
+   {
+    "kel": "CPM",
+    "cls": "",
+    "off": true
+   }
+  ]
+ },
+ "W-09": {
+  "soalTerbuka": "Jawaban sebenarnya: 32PSK (keluarga PSK), sinyal 10 dB",
+  "jelajahi": "Jawaban sebenarnya: BPSK (keluarga PSK), sinyal 30 dB",
+  "kembali": "Jawaban sebenarnya: 32QAM (keluarga QAM), sinyal 26 dB",
+  "gambarSama_jelajahi": false,
+  "gambarSama_kembali": false,
+  "soalSama_kembali": false,
+  "skorTerbuka": "🙋 Pengunjung\n0/1 (0%)\n🤖 MARSPEC\n1/1 (100%)\n🤖 Model biasa\n1/1 (100%)\nTebakan acak\n~18%",
+  "skorKembali": "🙋 Pengunjung\n0/1 (0%)\n🤖 MARSPEC\n1/1 (100%)\n🤖 Model biasa\n1/1 (100%)\nTebakan acak\n~18%",
+  "skorTerlihatDiJelajahi": false
+ },
+ "W-10": {
+  "skorSebelum": "🙋 Pengunjung\n0/3 (0%)\n🤖 MARSPEC (+3 kali tidak menjawab)\n0/3 (0%)\n🤖 Model biasa\n0/3 (0%)\nTebakan acak\n~18%",
+  "skorSesudah": "🙋 Pengunjung\n0/3 (0%)\n🤖 MARSPEC (+3 kali tidak menjawab)\n0/3 (0%)\n🤖 Model biasa\n0/3 (0%)\nTebakan acak\n~18%",
+  "sama": true,
+  "soalSebelum": "Jawaban sebenarnya: 128QAM (keluarga QAM), sinyal 14 dB",
+  "soalSesudah": "Jawaban sebenarnya: OOK (keluarga ASK), sinyal 10 dB",
+  "modeTantangSetelahF5": false
+ },
+ "W-15": {
+  "skorAwal": "🙋 Pengunjung\n0/0 (0%)\n🤖 MARSPEC\n0/0 (0%)\n🤖 Model biasa\n0/0 (0%)\nTebakan acak\n~18%",
+  "skorSelamaMain": "🙋 Pengunjung\n0/2 (0%)\n🤖 MARSPEC (+2 kali tidak menjawab)\n0/2 (0%)\n🤖 Model biasa\n0/2 (0%)\nTebakan acak\n~18%",
+  "skorJendelaBaru": "🙋 Pengunjung\n0/0 (0%)\n🤖 MARSPEC\n0/0 (0%)\n🤖 Model biasa\n0/0 (0%)\nTebakan acak\n~18%"
+ },
+ "W-16": {
+  "pesanRamahTampil": false,
+  "konsol": [
+   "[requestfailed] file:///<tmp>/salinan_demo_web/data/demo.js net::ERR_FILE_NOT_FOUND",
+   "[error] Failed to load resource: net::ERR_FILE_NOT_FOUND",
+   "[pageerror] Cannot read properties of undefined (reading 'keluarga')"
+  ],
+  "cuplikanTeks": "MARSPEC Maritime Spectrum Intelligence System\n\nBisakah AI mengenali jenis sinyal radio kapal ketika laut sedang mengamuk? Atur lautnya, lihat sendiri.\n\nJelajahi\n🎯 Tantang AI\n1. Jenis sinyal yang dikirim kapal\n2. Kondisi laut\nKenapa laut tenang tidak lebih mudah?\n3. Kekuatan sinyal:\nsangat lemah\nkua"
+ },
+ "W-17": {
+  "jelajahi": {
+   "mode": "Jelajahi",
+   "lebarViewport": 375,
+   "lebarDokumen": 375,
+   "guliranMenyamping": false,
+   "melebar": [],
+   "jumlahKontrol": 20,
+   "takBisaDitekan": []
+  },
+  "tantang": {
+   "mode": "Tantang AI",
+   "lebarViewport": 375,
+   "lebarDokumen": 375,
+   "guliranMenyamping": false,
+   "melebar": [],
+   "jumlahKontrol": 11,
+   "takBisaDitekan": []
+  }
+ }
+}

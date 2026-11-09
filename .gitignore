@@ -15,3 +15,4 @@ venv/
 *.pt
 *.pth
 *.npz
+node_modules/
