@@ -9,7 +9,7 @@ sistem. Dengan begitu bebannya setara, dan semua orang mempraktikkan kedua tekni
 | # | Bagian | Kode yang diuji | Berkas uji | Pemilik |
 |---|---|---|---|---|
 | 1 | Komponen sinyal | `SE1d`, `ChannelEqualizer`, `CNN1DExtractor`, `MCformerEncoder` | `test_1_komponen_sinyal.py` | [Anggota 1] |
-| 2 | Konteks & model utuh | `ContextEncoder`, `ContextGatedFusion`, `MoEChannelRouter`, `MaritimeAMCv3`, `validate_config` | `test_2_konteks_model.py` | [Anggota 2] |
+| 2 | Konteks & model utuh | `ContextEncoder`, `ContextGatedFusion`, `MoEChannelRouter`, `MaritimeAMCv3`, `validate_config` | `test_2_konteks_model.py` | Elsa Novia |
 | 3 | Simulator kanal laut | `MaritimeChannel.apply` | `test_3_kanal_laut.py` | [Anggota 3] |
 | 4 | Rugi & pemuat data | `moe_balance_loss`, `equalizer_aux_loss`, `scan_indices`, `load_X_inmemory` | `test_4_rugi_data.py` | M Tegar Fathan |
 | 5 | Evaluasi & CLI | `cocokkan_config`, `mode_oracle_latih`, `per_snr_table`, penjaga argumen `main()` | `test_5_evaluasi_cli.py` |  |
